@@ -96,6 +96,7 @@ module Poseidon
 end
 
 # Public API
+require "poseidon/consumer"
 require "poseidon/message_to_send"
 require "poseidon/producer"
 require "poseidon/fetched_message"

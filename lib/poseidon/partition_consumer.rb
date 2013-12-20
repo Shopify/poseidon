@@ -38,10 +38,10 @@ module Poseidon
     #
     # @param [String] client_id  Used to identify this client should be unique.
     # @param [String] host
-    # @param [Integer] port 
+    # @param [Integer] port
     # @param [String] topic Topic to read from
     # @param [Integer] partition Partitions are zero indexed.
-    # @param [Integer,Symbol] offset 
+    # @param [Integer,Symbol] offset
     #   Offset to start reading from. A negative offset can also be passed.
     #   There are a couple special offsets which can be passed as symbols:
     #     :earliest_offset       Start reading from the first offset the server has.
@@ -53,7 +53,7 @@ module Poseidon
     # @option options [:max_bytes] Maximum number of bytes to fetch
     #   Default: 1048576 (1MB)
     #
-    # @option options [:max_wait_ms] 
+    # @option options [:max_wait_ms]
     #   How long to block until the server sends us data.
     #   NOTE: This is only enforced if min_bytes is > 0.
     #   Default: 100 (100ms)
@@ -70,7 +70,7 @@ module Poseidon
       @host = host
       @port = port
 
-      handle_options(options)
+      handle_options(options.dup)
 
       @connection = Connection.new(host, port, client_id, @socket_timeout_ms)
       @topic = topic
@@ -91,7 +91,7 @@ module Poseidon
     # @option options [:max_wait_ms]
     #   How long to block until the server sends us data.
     #
-    # @option options [:min_bytes] 
+    # @option options [:min_bytes]
     #   Smallest amount of data the server should send us.
     #
     # @api public
@@ -106,7 +106,7 @@ module Poseidon
 
       topic_fetches = build_topic_fetch_request(fetch_max_bytes)
       fetch_response = @connection.fetch(fetch_max_wait, fetch_min_bytes, topic_fetches)
-      topic_response = fetch_response.topic_fetch_responses.first 
+      topic_response = fetch_response.topic_fetch_responses.first
       partition_response = topic_response.partition_fetch_responses.first
 
       unless partition_response.error == Errors::NO_ERROR_CODE
@@ -209,7 +209,7 @@ module Poseidon
         @partition,
         protocol_offset,
         max_number_of_offsets = 1)
-        
+
       [Protocol::TopicOffsetRequest.new(topic, [partition_offset_request])]
     end
 
