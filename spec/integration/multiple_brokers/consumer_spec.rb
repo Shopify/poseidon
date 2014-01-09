@@ -52,7 +52,7 @@ RSpec.describe "consuming with multiple brokers", :type => :request do
       msgs = fill_with_test_messages
 
       consumer = Consumer.new("test_client", %w(localhost:9092 localhost:9093 localhost:9094), "test", :earliest_offset)
-      expects(consumer.take(24).map(&:value).sort).to eq(msgs.sort)
+      expect(consumer.take(24).map(&:value).sort).to eq(msgs.sort)
     end
   end
 end
