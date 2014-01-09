@@ -21,14 +21,20 @@ RSpec.describe "consuming with multiple brokers", :type => :request do
     expect(brokers.size).to eq(3)
   end
 
-  it "consumes from all partitions" do
-    @p = Producer.new(["localhost:9092","localhost:9093","localhost:9094"], "test",
+  def fill_with_test_messages
+    p = Producer.new(%w(localhost:9092 localhost:9093 localhost:9094), "test",
                      :required_acks => 1)
 
     msgs = 24.times.map { |n| "hello_#{n}" }
     msgs.each do |msg|
-      @p.send_messages([MessageToSend.new("test", msg)])
+      p.send_messages([MessageToSend.new("test", msg)])
     end
+
+    msgs
+  end
+
+  it "consumes from all partitions" do
+    msgs = fill_with_test_messages
 
     fetched_messages = []
     0.upto(2) do |partition|
@@ -39,5 +45,14 @@ RSpec.describe "consuming with multiple brokers", :type => :request do
       fetched_messages.push(*pc.fetch)
     end
     expect(fetched_messages.map(&:value).sort).to eq(msgs.sort)
+  end
+
+  describe Consumer do
+    it "automatically consumes from all partitions" do
+      msgs = fill_with_test_messages
+
+      consumer = Consumer.new("test_client", %w(localhost:9092 localhost:9093 localhost:9094), "test", :earliest_offset)
+      expects(consumer.take(24).map(&:value).sort).to eq(msgs.sort)
+    end
   end
 end
