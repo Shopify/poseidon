@@ -64,13 +64,17 @@ module Poseidon
 
       begin
         threads = @partition_consumers.map do |partition_consumer|
-          Thread.new do
-            loop do
-              fetched_messages = partition_consumer.fetch
+          Thread.new(Thread.current) do |parent|
+            begin
+              loop do
+                fetched_messages = partition_consumer.fetch
 
-              fetched_messages.each do |fetched_message|
-                @queue << fetched_message
+                fetched_messages.each do |fetched_message|
+                  @queue << fetched_message
+                end
               end
+            rescue => e
+              parent.raise e
             end
           end
         end

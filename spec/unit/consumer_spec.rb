@@ -41,4 +41,17 @@ describe Consumer do
       expect(partition_consumers[1].instance_variable_get(:@port)).to eq(9094)
     end
   end
+
+  it "bubbles up Exceptions that happen in the PartitionConsumers" do
+    fake_partition_consumer = mock()
+    fake_partition_consumer.stub(:fetch).and_raise(Poseidon::Errors::ProtocolError.new)
+
+    expect do
+      consumer = Poseidon::Consumer.new(nil, nil, nil, nil)
+      consumer.instance_variable_set(:@partition_consumers, [fake_partition_consumer])
+      consumer.each do |message|
+
+      end
+    end.to raise_error Poseidon::Errors::ProtocolError
+  end
 end
